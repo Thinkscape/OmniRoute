@@ -103,6 +103,27 @@ describe("public origin resolution", () => {
     assert.equal(validateBrowserMutationOrigin(request).ok, true);
   });
 
+  it("does not allow trusted forwarded headers to widen a configured public origin", () => {
+    process.env.NEXT_PUBLIC_BASE_URL = "https://gateway.example.test";
+    process.env.OMNIROUTE_TRUST_PROXY = "true";
+    const request = new Request("http://omniroute:20128/api/providers/health-autopilot/actions", {
+      headers: {
+        ...stampedPeer("127.0.0.1"),
+        origin: "https://evil.example.test",
+        "x-forwarded-host": "evil.example.test",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    assert.equal(
+      getPublicOriginCandidates(request).some(
+        (candidate) => candidate.origin === "https://evil.example.test"
+      ),
+      false
+    );
+    assert.equal(validateBrowserMutationOrigin(request).ok, false);
+  });
+
   it("rejects malformed forwarded origins even when proxy trust is enabled", () => {
     process.env.OMNIROUTE_TRUST_PROXY = "true";
     const request = new Request("http://omniroute:20128/api/providers/health-autopilot/actions", {

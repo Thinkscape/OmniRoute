@@ -169,8 +169,10 @@ export function getPublicOriginCandidates(request: Request): PublicOriginCandida
   const configured = configuredPublicOrigin();
   if (configured) candidates.push({ origin: configured, source: "configured" });
 
-  const forwarded = trustedForwardedOrigin(request);
-  if (forwarded) candidates.push({ origin: forwarded, source: "trusted-forwarded" });
+  if (!configured) {
+    const forwarded = trustedForwardedOrigin(request);
+    if (forwarded) candidates.push({ origin: forwarded, source: "trusted-forwarded" });
+  }
 
   return uniqueCandidates(candidates);
 }
