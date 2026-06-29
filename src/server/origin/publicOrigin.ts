@@ -143,9 +143,7 @@ function trustedForwardedOrigin(request: Request): string | null {
     forwarded.proto ?? firstHeaderValue(request.headers.get("x-forwarded-proto"))
   );
   const host = sanitizeForwardedHost(
-    forwarded.host ??
-      firstHeaderValue(request.headers.get("x-forwarded-host")) ??
-      request.headers.get("host")
+    forwarded.host ?? firstHeaderValue(request.headers.get("x-forwarded-host"))
   );
   if (!proto || !host) return null;
 
